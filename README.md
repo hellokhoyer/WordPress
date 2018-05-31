@@ -1,2 +1,237 @@
-# WordPress
-WordPress Theme Development
+# Theme Development Handbook
+
+----------
+
+
+### Theme bootstrapping: ###
+আমাদের থিমের বুটস্ট্রাপিং করতে প্রথমেই functions.php তে কিছু ফাংশনালিটি অ্যাড করতে হয়। এইগুলোকে বুটস্ট্রাপিং অর্থাৎ থিম তৈরির প্রথম স্টেপ বলে থাকি।
+
+    <?php
+	function theme_bootstrapping(){
+		load_theme_textdomain("domain_name"); //ready to translate theme.
+		add_theme_support("post-thumbnails"); //for adding featured image
+		add_theme_support("title-tag");
+		register_nav_menu("topmenu", __("Top Menu", "text-domain_name")); //topmenu is location name.
+		register_nav_menu("footermenu", __("Top Menu", "text-domain_name")); //topmenu is location name.
+	}
+    add_action('after_setup_theme', 'theme_bootstrapping');
+
+> এখানে থিমের ডোমেইন নেম ফাংশন prefix হিসেবে থাকবে।
+
+
+
+### Style and Script Enqueue: ###
+
+wordpress.org এবং themeforest এর নিয়ম অনুযায়ী থিম এর সকল including ফাইল আলাদা ফোল্ডার এ রাখতে হয়। এ জন্য আমাদের একটা ফোল্ডার তৈরি করতে হবে। তো এখন আমরা inc নামের একটা ফোল্ডারে enqueue.php তে সকল ফাইল রাখবো। তো প্রথমেই আমাদের enqueue.php ফাইলটি থিমের functions.php ফাইলের সাথে যুক্ত করতে হবে। 
+
+    require_once(get_template_directory() . 'inc/enqueue.php');
+
+এবার enqueue.php তে আমাদের style এবং script ফাইল লিঙ্ক করবো।
+
+     function theme_assets() {
+     wp_enqueue_style( 'custom-style', get_stylesheet_uri() );
+     wp_enqueue_style( "owltheme", get_template_directory_uri()."/owl.theme.default.min.css", null );
+     wp_enqueue_script( 'script-name', get_template_directory_uri().'/js/example.js', array(), '1.0.0', true );
+	}
+
+	add_action('wp_enqueue_scripts', 'theme_assets');
+
+> এখানে থিমের ডোমেইন নেম ফাংশন prefix হিসেবে থাকবে।
+> 
+> WordPress 4.7 থেকে `get_theme_file_url("file-path")` ব্যবহার করা হয়।
+
+----------
+
+
+### Menu Register: ###
+নেভিগেশন মেনু তৈরি করতে আমাদের থিম অপশন থেকে প্রথমে মেনু সাপোর্ট দিতে হবে। থিম bootstrapping এ এই ফাংশন কল করতে হবে।
+
+     	register_nav_menu("topmenu", __("Top Menu", "text-domain_name")); //topmenu is location name.
+		register_nav_menu("footermenu", __("Top Menu", "text-domain_name")); //bottommenu is location name.
+
+এখন আমরা সাইটের ফ্রন্টেন্ডে মেনু নিয়ে আসবো। header.php তে কিছু কোড কোড অ্যাড করবো।
+
+    <?php
+	wp_nav_menu(
+		array(
+				'theme_location' => 'footermenu', //location from bootstrapping
+				'menu_class' => '' //ul class goes here.
+			 )
+	);
+	?>
+
+
+
+----------
+
+
+### Create Widget: ###
+
+প্রথমেই থিমের functions.php তে সাইডবার রেজিস্টার করে দিতে হবে।
+
+	function theme_sidebar {
+    	register_sidebar(
+			array(
+					'name'          => esc_html__( 'Sidebar', 'theme-prefix' ),
+					'id'            => 'sidebar_name',
+					'description'   => esc_html__( 'Add widgets here.', 'theme-prefix' ),
+					'before_widget' => '<div id="%1$s" class="widget %2$s">',
+					'after_widget'  => '</div>',
+					'before_title'  => '<h2 class="widget-title">',
+					'after_title'   => '</h2>',
+				)
+		);
+	}
+
+	add_action('widget_init', 'theme_sidebar');
+
+> before এবং after এ আপনার ইচ্ছামত ফ্রন্টেন্ড ক্লাস অ্যাড করে দিতে পারবেন।
+
+> এখানে থিমের ডোমেইন নেম ফাংশন prefix হিসেবে থাকবে।
+
+এবার সাইটের ফ্রন্টেন্ডে সাইডবার কল করবো। তো সাইটে সাইডবার কল করলে অবশ্যই তা কন্ডিশনাল মেথড ইউজ করে দিতে হবে।
+
+    		<?php if(is_active_sidebar('sidebar_name')) : ?>
+	            <div>
+	                <?php dynamic_sidebar('sidebar_name'); ?>
+	            </div>
+            <?php endif; ?>
+
+
+----------
+
+
+
+### Create Shortcode: ###
+
+থিম ফরেস্টের রেস্ট্রিকশন অনুযায়ী থিমের সাথে কোনো শর্টকোড রাখা যাবে না। তো এ জন্য আমাদের শর্টকোড কে আলাদা প্লাগিন হিসেবে ইউজ করতে হবে। প্লাগিন একটিক করে শর্টকোড ইউজ করবো।
+
+    
+	function alert_shortcode($atts, $content = null)
+    {
+        extract(shortcode_atts(array(
+        'type' => 'alert-success',
+        'text' => ''
+        ), $atts));
+
+        return '<div class="alert '.esc_attr($type).'" role="alert">'.esc_html($content).'</div>';
+    }
+	add_shortcode('alert', 'alert_shortcode');
+> শর্টকোড লিখার আগে আমাদের থিম নেম frefix হিসেবে ইউজ করতে হবে।
+
+##### একটু এডভান্সড লেভেল এর শর্টকোডের মাধ্যমে ইউজ করতে হলে #####
+
+    function post_list_shortcode($atts){
+    extract( shortcode_atts( array(
+        'count' => -1,
+        'type' => 'post'
+    ), $atts) );
+     
+    $q = new WP_Query(
+        array(
+            'posts_per_page' => -1,
+            'post_type' => $type
+            )
+        );      
+         
+    	$list = '<ul>';
+    while($q->have_posts()) : $q->the_post();
+        $idd = get_the_ID();
+        $post_content = get_the_content();
+        $list .= '<li><a href="'.get_permalink().'">'.get_the_title().'</a></li>';        
+    endwhile;
+    	$list.= '</ul>';
+    	wp_reset_query();
+    	return $list;
+	}
+	add_shortcode('post_list', 'post_list_shortcode');
+
+##### Visual Composer Addon with Shortcode #####
+
+
+	function vc_post_list_addon(){
+
+	vc_map( array(
+        "name" => __( "post list", "my-text-domain" ),
+        "base" => "post_list",
+        "params" => array(
+           array(
+              "type" => "textfield",
+              "heading" => __( "post count", "my-text-domain" ),
+              "param_name" => "count",
+              "value" => __( "Default param value", "my-text-domain" ),
+              "description" => __( "Description for foo param.", "my-text-domain" )
+           ),
+           array(
+            "type" => "textfield",
+            "heading" => __( "post count", "my-text-domain" ),
+            "param_name" => "count",
+            "value" => __( -1, "my-text-domain" ),
+            "description" => __( "this is description", "my-text-domain" )
+         )
+        )
+	));
+    
+	}
+	add_action('vc_before_init', 'vc_post_list_addon');
+
+----------
+
+
+#### More Advanced Shortcode And Plugin Snipet ####
+
+    <?php
+
+	 /*
+
+	Plugin Name: Stock Toolkit
+
+	 */
+
+	//exit if acceced directly
+	if ( ! defined('ABSPATH') ) {
+    exit;
+	}
+
+	//define
+	define ('STOCK_ACC_URL', WP_PlUGIN_URL . '/' . plugin_basename( dirname	(__FILE__) ) . '/');
+	define ('STOCK_ACC_PATH', plugin_dir_path( __FILE__ ));
+
+	function my_theme_custom_post() {
+    register_post_type( 'testimonial',
+        array(
+            'labels' => array(
+                name => __('testimonials'),
+                singular_name => __('testimonial')
+            ),
+            'supports' => array('title', 'editor', 'thumbnail', 'page-attributes'),
+            'public' => false,
+            'show_ui' => true,
+
+        ) 
+    );
+	}
+
+	//print shortcode in widget
+	add_filter('widget_text', 'do_shortcode');
+
+	//loading vc addons
+	require_once( STOCK_ACC_PATH . 'vc-addons/vc-blocks-load.php' );
+
+	//theme_shortcode
+	require_once( STOCK_ACC_PATH . 'theme-shortcodes/slides-shortcode.php' );
+
+	//shortcode depended on visual composer
+	include_once( ABSPATH . 'wp-admin/includes/plugin.php' );
+	if (is_plugin_active('js_composer/js_composer.php')){
+    require_once( STOCK_ACC_PATH . 'theme_shortcodes/staff-shortcode.php' );
+	}
+
+	//registering stock toolkit file
+	function stock_toolkit_files(){
+    wp_enqueue_style( 'owl_carousel', plugin_dir_url(__FILE__) . 'assets/css/owl-carousel.css' );
+    wp_enqueue_script( 'owl_carousel', plugin_dir_url(__FILE__) . 'assets/js/owl-carousel.js', array('jquery'), '', true);
+	}
+	add_action('wp_enqueue_scripts', 'stock_toolkit_files');
+
+	?>
