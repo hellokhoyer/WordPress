@@ -184,7 +184,7 @@ wordpress.org এবং themeforest এর নিয়ম অনুযায়ী �
 
 	 /*
 
-	Plugin Name: Stock Toolkit
+	Plugin Name: Theme Toolkit
 
 	 */
 
@@ -194,8 +194,8 @@ wordpress.org এবং themeforest এর নিয়ম অনুযায়ী �
 	}
 
 	//define
-	define ('STOCK_ACC_URL', WP_PlUGIN_URL . '/' . plugin_basename( dirname	(__FILE__) ) . '/');
-	define ('STOCK_ACC_PATH', plugin_dir_path( __FILE__ ));
+	define ('THEME_ACC_URL', WP_PlUGIN_URL . '/' . plugin_basename( dirname	(__FILE__) ) . '/');
+	define ('THEME_ACC_PATH', plugin_dir_path( __FILE__ ));
 
 	function my_theme_custom_post() {
     register_post_type( 'testimonial',
@@ -216,22 +216,22 @@ wordpress.org এবং themeforest এর নিয়ম অনুযায়ী �
 	add_filter('widget_text', 'do_shortcode');
 
 	//loading vc addons
-	require_once( STOCK_ACC_PATH . 'vc-addons/vc-blocks-load.php' );
+	require_once( THEME_ACC_PATH . 'vc-addons/vc-blocks-load.php' );
 
 	//theme_shortcode
-	require_once( STOCK_ACC_PATH . 'theme-shortcodes/slides-shortcode.php' );
+	require_once( THEME_ACC_PATH . 'theme-shortcodes/slides-shortcode.php' );
 
 	//shortcode depended on visual composer
 	include_once( ABSPATH . 'wp-admin/includes/plugin.php' );
 	if (is_plugin_active('js_composer/js_composer.php')){
-    require_once( STOCK_ACC_PATH . 'theme_shortcodes/staff-shortcode.php' );
+    require_once( THEME_ACC_PATH . 'theme_shortcodes/staff-shortcode.php' );
 	}
 
-	//registering stock toolkit file
-	function stock_toolkit_files(){
+	//registering theme toolkit file
+	function theme_toolkit_files(){
     wp_enqueue_style( 'owl_carousel', plugin_dir_url(__FILE__) . 'assets/css/owl-carousel.css' );
     wp_enqueue_script( 'owl_carousel', plugin_dir_url(__FILE__) . 'assets/js/owl-carousel.js', array('jquery'), '', true);
 	}
-	add_action('wp_enqueue_scripts', 'stock_toolkit_files');
+	add_action('wp_enqueue_scripts', 'theme_toolkit_files');
 
 	?>
