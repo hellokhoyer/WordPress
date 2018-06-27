@@ -12,7 +12,7 @@
 		add_theme_support("post-thumbnails"); //for adding featured image
 		add_theme_support("title-tag");
 		register_nav_menu("topmenu", __("Top Menu", "text-domain_name")); //topmenu is location name.
-		register_nav_menu("footermenu", __("Top Menu", "text-domain_name")); //topmenu is location name.
+		register_nav_menu("footermenu", __("Footer Menu", "text-domain_name")); //footermenu is location name.
 	}
     add_action('after_setup_theme', 'theme_bootstrapping');
 
@@ -74,7 +74,15 @@ wordpress.org এবং themeforest এর নিয়ম অনুযায়ী �
 নেভিগেশন মেনু তৈরি করতে আমাদের থিম অপশন থেকে প্রথমে মেনু সাপোর্ট দিতে হবে। থিম bootstrapping এ এই ফাংশন কল করতে হবে।
 
      	register_nav_menu("topmenu", __("Top Menu", "text-domain_name")); //topmenu is location name.
-		register_nav_menu("footermenu", __("Top Menu", "text-domain_name")); //bottommenu is location name.
+		register_nav_menu("footermenu", __("Bottom Menu", "text-domain_name")); //bottommenu is location name.
+
+এছাড়াও আপনি চাইলে array ব্যবহার করে একাধিক মেনু অ্যাড করতে পারবেন।
+
+    register_nav_menus( array(
+    'top_menu' => __( 'Top Menu', 'text_domain' ),
+    'footer_menu' => __( 'Footer Menu', 'text_domain' )
+    ) );
+    
 
 এখন আমরা সাইটের ফ্রন্টেন্ডে মেনু নিয়ে আসবো। header.php তে কিছু কোড কোড অ্যাড করবো।
 
