@@ -13,7 +13,7 @@
 - **[Create Widget](#create-widget)**
 - **[Custom Post Type](#custom-post-type)**
 - **[Codestar Framework](#codestar-framework)**
-- **[CMB2](#CMB2)**
+- **[CMB2](#cmb2)**
 
 
 
